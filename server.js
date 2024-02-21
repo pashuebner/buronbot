@@ -60,5 +60,5 @@ app.post('/ask', async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server running at http://ki.buron.de:${port}`);
+  console.log(`Server running at http://localhost:${port}`);
 });

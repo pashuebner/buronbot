@@ -1,3 +1,3 @@
 const config = {
-    apiBaseUrl: 'http://buronbot.onrender.com:3000'
+    apiBaseUrl: 'http://localhost:3000'
 };

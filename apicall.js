@@ -3,9 +3,19 @@ const express = require('express');
 const dotenv = require('dotenv').config();
 const OpenAI = require('openai');
 const bodyParser = require('body-parser');
+const cors = require('cors');
+const { marked } = require('marked');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
+
+
+app.use(cors({
+  origin: 'http://buronbot.onrender.com', // Ersetzen Sie dies mit der tatsächlichen Domain Ihrer Webseite
+  methods: ['GET', 'POST'], // Erlaubte Methoden
+  allowedHeaders: ['Content-Type'], // Erlaubte Header
+}));
+app.use(express.static('public'));
 
 // Middleware to parse JSON bodies
 app.use(bodyParser.json());
@@ -39,8 +49,10 @@ app.post('/ask', async (req, res) => {
 
     const messages = await openai.beta.threads.messages.list(thread.id);
     const lastMessageForRun = messages.data.filter(message => message.run_id === run.id && message.role === "assistant").pop();
-
-    res.json({ answer: lastMessageForRun ? lastMessageForRun.content[0].text.value : "Sorry, I couldn't find an answer." });
+    let lastMessageToConvert = lastMessageForRun.content[0].text.value;
+    let markDownContent = marked(lastMessageToConvert);
+    console.log(markDownContent);
+    res.json({ answer: lastMessageForRun ? markDownContent : "Sorry, I couldn't find an answer." });
   } catch (error) {
     console.error(error);
     res.status(500).send("An error occurred.");
