@@ -44,6 +44,7 @@ const openai = new OpenAI({
 
 // Route to handle questions
 app.post('/ask', async (req, res) => {
+  console.log('Session ID:', req.sessionID);
   const { question } = req.body;
 
   try {
