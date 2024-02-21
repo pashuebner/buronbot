@@ -3,8 +3,6 @@ const dotenv = require('dotenv').config();
 const OpenAI = require('openai');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const crypto = require('crypto');
-const secretKeyGen = crypto.randomBytes(64).toString('hex');
 const session = require('express-session');
 const { marked } = require('marked');
 
@@ -29,10 +27,10 @@ app.use(bodyParser.json());
 
 // Configure session middleware
 app.use(session({
-  secret: secretKeyGen, // Use a strong secret key
+  secret: process.env.SESSION_SECRET, // Use a strong secret key
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: !process.env.DEV_MODE } // Set secure to true if using HTTPS
+  cookie: { secure: true } // Set secure to true if using HTTPS
 }));
 
 app.get('/', (req, res) => {
