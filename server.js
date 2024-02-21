@@ -1,5 +1,5 @@
+// server.js
 const express = require('express');
-const session = require('express-session');
 const dotenv = require('dotenv').config();
 const OpenAI = require('openai');
 const bodyParser = require('body-parser');
@@ -9,56 +9,48 @@ const { marked } = require('marked');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Session configuration
-app.use(session({
-  secret: 'your_secret_key',
-  resave: false,
-  saveUninitialized: true,
-  cookie: { secure: true }
-}));
 
 app.use(cors({
-  origin: 'https://ki.buron.de',
-  methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type'],
+  origin: 'https://ki.buron.de', // Ersetzen Sie dies mit der tatsächlichen Domain Ihrer Webseite
+  methods: ['GET', 'POST'], // Erlaubte Methoden
+  allowedHeaders: ['Content-Type'], // Erlaubte Header
 }));
 app.use(express.static('public'));
+
+// Middleware to parse JSON bodies
 app.use(bodyParser.json());
 
 app.get('/', (req, res) => {
   res.send('Buron Bot is running!');
 });
-
+// Initialize OpenAI
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+// Route to handle questions
 app.post('/ask', async (req, res) => {
   const { question } = req.body;
-  let threadId = req.session.threadId;
 
   try {
-    if (!threadId) {
-      const thread = await openai.beta.threads.create();
-      req.session.threadId = thread.id;
-      threadId = thread.id;
-    }
-
-    await openai.beta.threads.messages.create(threadId, {
+    const assistant = await openai.beta.assistants.retrieve('asst_MaxQ5GBsUv7U8FRHISngVC2x');
+    const thread = await openai.beta.threads.create();
+    console.log(thread);
+    await openai.beta.threads.messages.create(thread.id, {
       role: "user",
       content: question,
     });
-    console.log(threadId);
-    const run = await openai.beta.threads.runs.create(threadId, { assistant_id: process.env.ASSISTANT_ID });
+
+    const run = await openai.beta.threads.runs.create(thread.id, { assistant_id: assistant.id });
 
     // Simplified for demonstration; consider implementing proper polling/waiting mechanism
-    let runStatus = await openai.beta.threads.runs.retrieve(threadId, run.id);
+    let runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id);
     while (runStatus.status !== "completed") {
       await new Promise(resolve => setTimeout(resolve, 2000));
-      runStatus = await openai.beta.threads.runs.retrieve(threadId, run.id);
+      runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id);
     }
 
-    const messages = await openai.beta.threads.messages.list(threadId);
+    const messages = await openai.beta.threads.messages.list(thread.id);
     const lastMessageForRun = messages.data.filter(message => message.run_id === run.id && message.role === "assistant").pop();
     let lastMessageToConvert = lastMessageForRun.content[0].text.value;
     let markDownContent = marked(lastMessageToConvert);
