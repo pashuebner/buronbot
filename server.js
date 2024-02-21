@@ -48,7 +48,7 @@ app.post('/ask', async (req, res) => {
       role: "user",
       content: question,
     });
-
+    console.log(threadId);
     const run = await openai.beta.threads.runs.create(threadId, { assistant_id: process.env.ASSISTANT_ID });
 
     // Simplified for demonstration; consider implementing proper polling/waiting mechanism
