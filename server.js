@@ -11,10 +11,21 @@ const port = process.env.PORT || 3000;
 
 
 app.use(cors({
-  origin: 'https://ki.buron.de', // Ersetzen Sie dies mit der tatsächlichen Domain Ihrer Webseite
-  methods: ['GET', 'POST'], // Erlaubte Methoden
-  allowedHeaders: ['Content-Type'], // Erlaubte Header
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    // Check if the origin ends with 'buron.de'
+    if (origin.endsWith('.buron.de')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST'], // Allowed methods
+  allowedHeaders: ['Content-Type'], // Allowed headers
 }));
+
 app.use(express.static('public'));
 
 // Middleware to parse JSON bodies
