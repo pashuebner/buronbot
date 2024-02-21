@@ -11,7 +11,7 @@ const port = process.env.PORT || 3000;
 
 
 app.use(cors({
-  origin: 'http://ki.buron.de', // Ersetzen Sie dies mit der tatsächlichen Domain Ihrer Webseite
+  origin: 'https://ki.buron.de', // Ersetzen Sie dies mit der tatsächlichen Domain Ihrer Webseite
   methods: ['GET', 'POST'], // Erlaubte Methoden
   allowedHeaders: ['Content-Type'], // Erlaubte Header
 }));
