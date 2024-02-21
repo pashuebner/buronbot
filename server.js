@@ -33,6 +33,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: { 
+    sameSite: 'none',
     secure: true,
     httpOnly: true, // Prevents client-side JS from accessing the cookie
     maxAge: 24 * 60 * 60 * 1000 // Sets a max age for the session cookie (e.g., 1 day)
