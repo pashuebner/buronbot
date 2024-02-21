@@ -11,7 +11,7 @@ const port = process.env.PORT || 3000;
 
 
 app.use(cors({
-  origin: 'http://buronbot.onrender.com', // Ersetzen Sie dies mit der tatsächlichen Domain Ihrer Webseite
+  origin: 'https://buronbot.onrender.com', // Ersetzen Sie dies mit der tatsächlichen Domain Ihrer Webseite
   methods: ['GET', 'POST'], // Erlaubte Methoden
   allowedHeaders: ['Content-Type'], // Erlaubte Header
 }));
