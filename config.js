@@ -1,3 +1,3 @@
 const config = {
-    apiBaseUrl: 'http://ki.buron.de:3000'
+    apiBaseUrl: 'http://buronbot.onrender.com:3000'
 };
