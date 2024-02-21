@@ -15,7 +15,7 @@ app.use(cors({
   methods: ['GET', 'POST'], // Erlaubte Methoden
   allowedHeaders: ['Content-Type'], // Erlaubte Header
 }));
-app.use(express.static('public'));
+app.use('/', express.static('dist'));
 
 // Middleware to parse JSON bodies
 app.use(bodyParser.json());
