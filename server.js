@@ -20,6 +20,9 @@ app.use(express.static('public'));
 // Middleware to parse JSON bodies
 app.use(bodyParser.json());
 
+app.get('/', (req, res) => {
+  res.send('Buron Bot is running!');
+});
 // Initialize OpenAI
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
