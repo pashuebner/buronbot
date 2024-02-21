@@ -31,8 +31,12 @@ app.use(bodyParser.json());
 app.use(session({
   secret: process.env.SESSION_SECRET, // Use a strong secret key
   resave: false,
-  saveUninitialized: true,
-  cookie: { secure: true } // Set secure to true if using HTTPS
+  saveUninitialized: false,
+  cookie: { 
+    secure: true,
+    httpOnly: true, // Prevents client-side JS from accessing the cookie
+    maxAge: 24 * 60 * 60 * 1000 // Sets a max age for the session cookie (e.g., 1 day)
+  } // Set secure to true if using HTTPS
 }));
 
 app.get('/', (req, res) => {
