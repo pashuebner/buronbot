@@ -30,35 +30,32 @@ const openai = new OpenAI({
 
 // Route to handle questions
 app.post('/ask', async (req, res) => {
-  const { question, threadId: clientThreadId } = req.body;
-  let threadId = clientThreadId;
+  const { question } = req.body;
 
   try {
-    if (!threadId) {
-      // If no threadId is provided, create a new thread
-      const thread = await openai.beta.threads.create();
-      threadId = thread.id;
-    }
+    const assistant = await openai.beta.assistants.retrieve('asst_MaxQ5GBsUv7U8FRHISngVC2x');
+    const thread = await openai.beta.threads.create();
 
-    await openai.beta.threads.messages.create(threadId, {
+    await openai.beta.threads.messages.create(thread.id, {
       role: "user",
       content: question,
     });
 
-    const run = await openai.beta.threads.runs.create(threadId, { assistant_id: process.env.ASSISTANT_ID });
+    const run = await openai.beta.threads.runs.create(thread.id, { assistant_id: assistant.id });
 
-    let runStatus = await openai.beta.threads.runs.retrieve(threadId, run.id);
+    // Simplified for demonstration; consider implementing proper polling/waiting mechanism
+    let runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id);
     while (runStatus.status !== "completed") {
       await new Promise(resolve => setTimeout(resolve, 2000));
-      runStatus = await openai.beta.threads.runs.retrieve(threadId, run.id);
+      runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id);
     }
 
-    const messages = await openai.beta.threads.messages.list(threadId);
+    const messages = await openai.beta.threads.messages.list(thread.id);
     const lastMessageForRun = messages.data.filter(message => message.run_id === run.id && message.role === "assistant").pop();
     let lastMessageToConvert = lastMessageForRun.content[0].text.value;
     let markDownContent = marked(lastMessageToConvert);
     console.log(markDownContent);
-    res.json({ answer: markDownContent, threadId }); // Return the used or new threadId to the client
+    res.json({ answer: lastMessageForRun ? markDownContent : "Sorry, I couldn't find an answer." });
   } catch (error) {
     console.error(error);
     res.status(500).send("An error occurred.");
