@@ -42,7 +42,7 @@
           bkiArea.insertAdjacentHTML('beforeEnd','<div class="bki-user-input">'+question+'</div>');
             bkiArea.insertAdjacentHTML('beforeEnd','<div id="bki-a'+answerCount+'" class="bki-ki-answer waiting"><span class="dots"></span><span class="dots"></span><span class="dots"></span></div>');
             document.getElementById('bki-input').value = "";
-          const response = await fetch(`${config.apiBaseUrl}/ask`, {
+          const response = await fetch(`http://localhost:3000/ask`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
