@@ -11,7 +11,7 @@ const port = process.env.PORT || 3000;
 
 
 app.use(cors({
-  origin: 'https://buronbot.onrender.com', // Ersetzen Sie dies mit der tatsächlichen Domain Ihrer Webseite
+  origin: 'http://ki.buron.de', // Ersetzen Sie dies mit der tatsächlichen Domain Ihrer Webseite
   methods: ['GET', 'POST'], // Erlaubte Methoden
   allowedHeaders: ['Content-Type'], // Erlaubte Header
 }));
@@ -60,5 +60,5 @@ app.post('/ask', async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server running at https://buronbot.onrender.com:${port}`);
+  console.log(`Server running at :${port}`);
 });
