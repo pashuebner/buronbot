@@ -31,7 +31,6 @@
         </div>
         <p class="credits">powered by Itletics - Alex Urhle &  Pascal Hübner</p>
       </div>
-      <script src="./config.js"></script>
       <script>
         const bkiArea = document.querySelector('#bki-chat-area');
         let answerCount = 0;
@@ -42,7 +41,7 @@
           bkiArea.insertAdjacentHTML('beforeEnd','<div class="bki-user-input">'+question+'</div>');
             bkiArea.insertAdjacentHTML('beforeEnd','<div id="bki-a'+answerCount+'" class="bki-ki-answer waiting"><span class="dots"></span><span class="dots"></span><span class="dots"></span></div>');
             document.getElementById('bki-input').value = "";
-          const response = await fetch(`http://localhost:3000/ask`, {
+          const response = await fetch(`https://buronbot.onrender.com:3000/ask`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
