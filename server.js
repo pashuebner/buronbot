@@ -20,7 +20,9 @@ app.use(cors({
   },
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type'],
+  credentials: true // Allow credentials
 }));
+
 
 app.use(express.static('public'));
 app.use(bodyParser.json());
