@@ -30,32 +30,35 @@ const openai = new OpenAI({
 
 // Route to handle questions
 app.post('/ask', async (req, res) => {
-  const { question } = req.body;
+  const { question, threadId: clientThreadId } = req.body;
+  let threadId = clientThreadId;
 
   try {
-    const assistant = await openai.beta.assistants.retrieve('asst_MaxQ5GBsUv7U8FRHISngVC2x');
-    const thread = await openai.beta.threads.create();
-    console.log(thread);
-    await openai.beta.threads.messages.create(thread.id, {
+    if (!threadId) {
+      // If no threadId is provided, create a new thread
+      const thread = await openai.beta.threads.create();
+      threadId = thread.id;
+    }
+
+    await openai.beta.threads.messages.create(threadId, {
       role: "user",
       content: question,
     });
 
-    const run = await openai.beta.threads.runs.create(thread.id, { assistant_id: assistant.id });
+    const run = await openai.beta.threads.runs.create(threadId, { assistant_id: process.env.ASSISTANT_ID });
 
-    // Simplified for demonstration; consider implementing proper polling/waiting mechanism
-    let runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id);
+    let runStatus = await openai.beta.threads.runs.retrieve(threadId, run.id);
     while (runStatus.status !== "completed") {
       await new Promise(resolve => setTimeout(resolve, 2000));
-      runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id);
+      runStatus = await openai.beta.threads.runs.retrieve(threadId, run.id);
     }
 
-    const messages = await openai.beta.threads.messages.list(thread.id);
+    const messages = await openai.beta.threads.messages.list(threadId);
     const lastMessageForRun = messages.data.filter(message => message.run_id === run.id && message.role === "assistant").pop();
     let lastMessageToConvert = lastMessageForRun.content[0].text.value;
     let markDownContent = marked(lastMessageToConvert);
     console.log(markDownContent);
-    res.json({ answer: lastMessageForRun ? markDownContent : "Sorry, I couldn't find an answer." });
+    res.json({ answer: markDownContent, threadId }); // Return the used or new threadId to the client
   } catch (error) {
     console.error(error);
     res.status(500).send("An error occurred.");
