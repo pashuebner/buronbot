@@ -10,7 +10,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors({
-  origin: 'https://bb-web.onrender.com/',
+  origin: 'https://bb-web.onrender.com',
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type'],
   credentials: true // Allow credentials
