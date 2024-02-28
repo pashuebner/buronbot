@@ -59,19 +59,19 @@ const openai = new OpenAI({
 
 // Route to handle questions
 app.post('/ask', async (req, res) => {
+  
   const { question, threadId } = req.body; // Extract threadId from the request
-
+  
   try {
     const assistant = await openai.beta.assistants.retrieve('asst_MaxQ5GBsUv7U8FRHISngVC2x');
-
+    
     let currentThreadId = threadId;
     // Use provided threadId or create a new one
     if (!currentThreadId) {
       const thread = await openai.beta.threads.create();
       currentThreadId = thread.id; // Use the new thread ID
     }
-    console.log(`Current Thread ID: ${currentThreadId}`);
-    
+    console.log(currentThreadId);
     await openai.beta.threads.messages.create(currentThreadId, {
       role: "user",
       content: question,
@@ -85,35 +85,15 @@ app.post('/ask', async (req, res) => {
       runStatus = await openai.beta.threads.runs.retrieve(currentThreadId, run.id);
     }
 
-    // Initialize variables for handling follow-ups
-    let finalAnswer = '';
-    let attempts = 0;
-    const maxAttempts = 5; // Maximum number of follow-up checks
-
-    do {
-      // Fetch all messages in the thread
-      const messages = await openai.beta.threads.messages.list(currentThreadId);
-      const newMessages = messages.data.filter(message => message.run_id === run.id && message.role === "assistant");
-
-      // Append new assistant messages to finalAnswer
-      newMessages.forEach(message => {
-        finalAnswer += marked(message.content[0].text.value) + "\n";
-      });
-
-      if (newMessages.length === 0 || attempts >= maxAttempts - 1) {
-        // Exit loop if no new messages or max attempts reached
-        break;
-      } else {
-        // Wait before next check for new messages
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        attempts++;
-      }
-    } while (true);
-
-    console.log(`Final Answer: ${finalAnswer}`);
-    res.json({ answer: finalAnswer || "Entschuldigung, ich konnte nichts finden.", threadId: currentThreadId });
+    const messages = await openai.beta.threads.messages.list(currentThreadId);
+    const lastMessageForRun = messages.data.filter(message => message.run_id === run.id && message.role === "assistant").pop();
+    let lastMessageToConvert = lastMessageForRun.content[0].text.value;
+    let markDownContent = marked(lastMessageToConvert);
+    console.log(markDownContent);
+    console.log(currentThreadId);
+    res.json({ answer: lastMessageForRun ? markDownContent : "Entschuldigung, ich konnte leider nichts zu Ihrer Frage finden.", threadId: currentThreadId }); // Include threadId in response
   } catch (error) {
-    console.error(`An error occurred: ${error}`);
+    console.error(error);
     res.status(500).send("An error occurred.");
   }
 });
