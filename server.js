@@ -20,6 +20,7 @@ app.use(cors({
 app.use(express.static('public'));
 app.use(bodyParser.json());
 
+
 // Configure session middleware
 app.use(session({
   secret: process.env.SESSION_SECRET, // Use a strong secret key
@@ -27,7 +28,6 @@ app.use(session({
   saveUninitialized: true,
   cookie: { 
     secure: true,
-    httpOnly: true, // Prevents client-side JS from accessing the cookie
     maxAge: 24 * 60 * 60 * 1000 // Sets a max age for the session cookie (e.g., 1 day)
   } // Set secure to true if using HTTPS
 }));
