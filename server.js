@@ -10,7 +10,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors({
-  origin: 'https://ki.buron.de',
+  origin: 'https://bb-web.onrender.dcom',
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type'],
   credentials: true // Allow credentials
@@ -26,7 +26,7 @@ app.use(session({
   resave: false,
   saveUninitialized: true,
   cookie: { 
-    secure: false,
+    secure: true,
     sameSite: 'none',
     httpOnly: true, // Prevents client-side JS from accessing the cookie
     maxAge: 24 * 60 * 60 * 1000 // Sets a max age for the session cookie (e.g., 1 day)
