@@ -59,19 +59,17 @@ const openai = new OpenAI({
 
 // Route to handle questions
 app.post('/ask', async (req, res) => {
-  
-  const { question, threadId } = req.body; // Extract threadId from the request
-  
+  const { question, threadId } = req.body;
+
   try {
     const assistant = await openai.beta.assistants.retrieve('asst_MaxQ5GBsUv7U8FRHISngVC2x');
     
     let currentThreadId = threadId;
-    // Use provided threadId or create a new one
     if (!currentThreadId) {
       const thread = await openai.beta.threads.create();
-      currentThreadId = thread.id; // Use the new thread ID
+      currentThreadId = thread.id;
     }
-    console.log(currentThreadId);
+
     await openai.beta.threads.messages.create(currentThreadId, {
       role: "user",
       content: question,
@@ -87,16 +85,21 @@ app.post('/ask', async (req, res) => {
 
     const messages = await openai.beta.threads.messages.list(currentThreadId);
     const lastMessageForRun = messages.data.filter(message => message.run_id === run.id && message.role === "assistant").pop();
-    let lastMessageToConvert = lastMessageForRun.content[0].text.value;
-    let markDownContent = marked(lastMessageToConvert);
-    console.log(markDownContent);
-    console.log(currentThreadId);
-    res.json({ answer: lastMessageForRun ? markDownContent : "Entschuldigung, ich konnte leider nichts zu Ihrer Frage finden.", threadId: currentThreadId }); // Include threadId in response
+
+    if (!lastMessageForRun.content[0].text.annotations.text || lastMessageForRun.content[0].text.annotations.length === 0) {
+      // Immediately send back the informational message
+      let informationalMessage = lastMessageForRun.content[0].text.value;
+      res.json({ infoMessage: informationalMessage, followUpNeeded: true, threadId: currentThreadId });
+    } else {
+      let markDownContent = marked(lastMessageForRun.content[0].text.value);
+      res.json({ answer: markDownContent, followUpNeeded: false, threadId: currentThreadId });
+    }
   } catch (error) {
     console.error(error);
     res.status(500).send("An error occurred.");
   }
 });
+
 
 app.listen(port, () => {
   console.log(`Server running at :${port}`);
