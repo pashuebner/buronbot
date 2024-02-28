@@ -59,9 +59,9 @@ const openai = new OpenAI({
 
 // Route to handle questions
 app.post('/ask', async (req, res) => {
-  console.log('Session ID:', req.sessionID);
+  
   const { question, threadId } = req.body; // Extract threadId from the request
-
+  
   try {
     const assistant = await openai.beta.assistants.retrieve('asst_MaxQ5GBsUv7U8FRHISngVC2x');
     
@@ -71,7 +71,7 @@ app.post('/ask', async (req, res) => {
       const thread = await openai.beta.threads.create();
       currentThreadId = thread.id; // Use the new thread ID
     }
-    
+    console.log(currentThreadId);
     await openai.beta.threads.messages.create(currentThreadId, {
       role: "user",
       content: question,
