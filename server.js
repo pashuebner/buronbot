@@ -9,12 +9,25 @@ const { marked } = require('marked');
 const app = express();
 const port = process.env.PORT || 3000;
 
+const allowedOrigins = ['https://bb-web.onrender.com/', 'https://bb-web.onrender.com', 'https://ki.buron.de', 'https://www.ki.buron.de', 'https://ki.buron.de/', 'https://www.ki.buron.de/'];
+
 app.use(cors({
-  origin: 'https://bb-web.onrender.com',
+  origin: function(origin, callback) {
+    // allow requests with no origin 
+    // (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      var msg = 'The CORS policy for this site does not ' +
+                'allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true,
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type'],
-  credentials: true // Allow credentials
 }));
+
 
 
 app.use(express.static('public'));
@@ -31,6 +44,7 @@ app.use(session({
     httpOnly: true, // Prevents client-side JS from accessing the cookie
     maxAge: 24 * 60 * 60 * 1000, // Sets a max age for the session cookie (e.g., 1 day)
     domain: '.onrender.com',
+    sameSite: 'None',
   }
 }));
 
