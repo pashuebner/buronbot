@@ -86,7 +86,7 @@ app.post('/ask', async (req, res) => {
     const messages = await openai.beta.threads.messages.list(currentThreadId);
     const lastMessageForRun = messages.data.filter(message => message.run_id === run.id && message.role === "assistant").pop();
 
-    if (!lastMessageForRun.content[0].text.annotations.text || lastMessageForRun.content[0].text.annotations.length === 0) {
+    if (!lastMessageForRun.content[0].text.annotations || lastMessageForRun.content[0].text.annotations.length === 0) {
       // Immediately send back the informational message
       let informationalMessage = lastMessageForRun.content[0].text.value;
       res.json({ infoMessage: informationalMessage, followUpNeeded: true, threadId: currentThreadId });
