@@ -34,7 +34,7 @@ app.use(session({
 }));
 
 app.get('/', (req, res) => {
-  res.send('Buron Bot is running!');
+  res.sendFile(path.join(__dirname, "./www/index.html"));
 });
 
 // Initialize OpenAI
