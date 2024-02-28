@@ -60,37 +60,38 @@ const openai = new OpenAI({
 // Route to handle questions
 app.post('/ask', async (req, res) => {
   console.log('Session ID:', req.sessionID);
-  const { question } = req.body;
+  const { question, threadId } = req.body; // Extract threadId from the request
 
   try {
     const assistant = await openai.beta.assistants.retrieve('asst_MaxQ5GBsUv7U8FRHISngVC2x');
     
-    // Use session to manage user's thread ID
-    if (!req.session.threadId) {
+    let currentThreadId = threadId;
+    // Use provided threadId or create a new one
+    if (!currentThreadId) {
       const thread = await openai.beta.threads.create();
-      req.session.threadId = thread.id; // Store the new thread ID in the session
+      currentThreadId = thread.id; // Use the new thread ID
     }
     
-    await openai.beta.threads.messages.create(req.session.threadId, {
+    await openai.beta.threads.messages.create(currentThreadId, {
       role: "user",
       content: question,
     });
 
-    const run = await openai.beta.threads.runs.create(req.session.threadId, { assistant_id: assistant.id });
+    const run = await openai.beta.threads.runs.create(currentThreadId, { assistant_id: assistant.id });
 
-    let runStatus = await openai.beta.threads.runs.retrieve(req.session.threadId, run.id);
+    let runStatus = await openai.beta.threads.runs.retrieve(currentThreadId, run.id);
     while (runStatus.status !== "completed") {
       await new Promise(resolve => setTimeout(resolve, 2000));
-      runStatus = await openai.beta.threads.runs.retrieve(req.session.threadId, run.id);
+      runStatus = await openai.beta.threads.runs.retrieve(currentThreadId, run.id);
     }
 
-    const messages = await openai.beta.threads.messages.list(req.session.threadId);
+    const messages = await openai.beta.threads.messages.list(currentThreadId);
     const lastMessageForRun = messages.data.filter(message => message.run_id === run.id && message.role === "assistant").pop();
     let lastMessageToConvert = lastMessageForRun.content[0].text.value;
     let markDownContent = marked(lastMessageToConvert);
     console.log(markDownContent);
-    console.log(req.session.threadId);
-    res.json({ answer: lastMessageForRun ? markDownContent : "Sorry, I couldn't find an answer." });
+    console.log(currentThreadId);
+    res.json({ answer: lastMessageForRun ? markDownContent : "Sorry, I couldn't find an answer.", threadId: currentThreadId }); // Include threadId in response
   } catch (error) {
     console.error(error);
     res.status(500).send("An error occurred.");
