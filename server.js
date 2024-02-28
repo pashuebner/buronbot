@@ -28,8 +28,10 @@ app.use(session({
   saveUninitialized: true,
   cookie: { 
     secure: true,
-    maxAge: 24 * 60 * 60 * 1000 // Sets a max age for the session cookie (e.g., 1 day)
-  } // Set secure to true if using HTTPS
+    httpOnly: true, // Prevents client-side JS from accessing the cookie
+    maxAge: 24 * 60 * 60 * 1000, // Sets a max age for the session cookie (e.g., 1 day)
+    domain: '.onrender.com',
+  }
 }));
 
 app.get('/', (req, res) => {
