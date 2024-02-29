@@ -3,7 +3,6 @@ const dotenv = require('dotenv').config();
 const OpenAI = require('openai');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const session = require('express-session');
 const { marked } = require('marked');
 
 const app = express();
@@ -32,21 +31,6 @@ app.use(cors({
 
 app.use(express.static('public'));
 app.use(bodyParser.json());
-
-
-// Configure session middleware
-app.use(session({
-  secret: process.env.SESSION_SECRET, // Use a strong secret key
-  resave: false,
-  saveUninitialized: true,
-  cookie: { 
-    secure: true,
-    httpOnly: true, // Prevents client-side JS from accessing the cookie
-    maxAge: 24 * 60 * 60 * 1000, // Sets a max age for the session cookie (e.g., 1 day)
-    domain: '.onrender.com',
-    sameSite: 'None',
-  }
-}));
 
 app.get('/', (req, res) => {
   res.send('Buron Bot is running!');
