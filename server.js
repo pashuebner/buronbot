@@ -43,15 +43,18 @@ const openai = new OpenAI({
 
 // Route to handle questions
 app.post('/ask', async (req, res) => {
-  const { question, threadId } = req.body;
+  const { question, threadId, cat } = req.body;
 
   try {
     const assistant = await openai.beta.assistants.retrieve('asst_MaxQ5GBsUv7U8FRHISngVC2x');
-    
+    let category = cat;
     let currentThreadId = threadId;
     if (!currentThreadId) {
       const thread = await openai.beta.threads.create();
       currentThreadId = thread.id;
+    }
+    if(category){
+      question = question+', Suche im Bereich: '+cat;
     }
 
     await openai.beta.threads.messages.create(currentThreadId, {
