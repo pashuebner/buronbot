@@ -90,7 +90,7 @@ app.post('/ask', async (req, res) => {
 });
 
 app.post('/scrape', async (req, res) => {
-const url = req.body;
+const url = req.body.question;
 
 axios.get(url)
   .then(response => {
