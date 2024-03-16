@@ -122,6 +122,7 @@ let sitetext;
     const messages = await openai.beta.threads.messages.list(currentThreadId);
     const lastMessageForRun = messages.data.filter(message => message.run_id === run.id && message.role === "assistant").pop();
       let markDownContent = marked(lastMessageForRun.content[0].text.value);
+      console.log(markDownContent);
       res.json({ answer: markDownContent });
   } catch (error) {
     console.error(error);
