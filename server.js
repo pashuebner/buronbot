@@ -99,7 +99,7 @@ let sitetext;
         const html = response.data;
         const $ = cheerio.load(html);
         const targetElement = $('#ctl00_contentpane .content-block');
-        sitetext = targetElement.html().replace(/\s+/g, '');
+        sitetext = targetElement.html().replace(/(?:\r\n|\r|\n)/g, '');
       })
       .catch(console.error);
 
@@ -121,14 +121,8 @@ let sitetext;
     }
     const messages = await openai.beta.threads.messages.list(currentThreadId);
     const lastMessageForRun = messages.data.filter(message => message.run_id === run.id && message.role === "assistant").pop();
-    if (!lastMessageForRun.content[0].text.annotations || lastMessageForRun.content[0].text.annotations.length === 0) {
-      // Immediately send back the informational message
-      let informationalMessage = lastMessageForRun.content[0].text.value;
-      res.json({ infoMessage: informationalMessage, followUpNeeded: true, threadId: currentThreadId });
-    } else {
       let markDownContent = marked(lastMessageForRun.content[0].text.value);
-      res.json({ answer: markDownContent, followUpNeeded: false, threadId: currentThreadId });
-    }
+      res.json({ answer: markDownContent });
   } catch (error) {
     console.error(error);
     res.status(500).send("An error occurred.");
