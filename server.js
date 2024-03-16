@@ -91,16 +91,49 @@ app.post('/ask', async (req, res) => {
 
 app.post('/scrape', async (req, res) => {
 const url = req.body.question;
-
+let sitetext;
 axios.get(url)
   .then(response => {
     const html = response.data;
     const $ = cheerio.load(html);
     const targetElement = $('#ctl00_contentpane .content-block');
-    const sitetext = targetElement.text();
-    console.log(sitetext);
+    sitetext = targetElement.html();
+    res.json({answer: sitetext});
   })
   .catch(console.error);
+
+  let asking = "Verwende diesen HTML Abschnitt und erstelle eine Tabelle mit den hier enthaltenen Informationen: "+sitetext;
+  try {
+    const assistant = await openai.beta.assistants.retrieve('asst_MaxQ5GBsUv7U8FRHISngVC2x');
+    const thread = await openai.beta.threads.create();
+    currentThreadId = thread.id;
+    await openai.beta.threads.messages.create(currentThreadId, {
+      role: "user",
+      content: asking,
+    });
+    const run = await openai.beta.threads.runs.create(currentThreadId, { assistant_id: assistant.id });
+    let runStatus = await openai.beta.threads.runs.retrieve(currentThreadId, run.id);
+    while (runStatus.status !== "completed") {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      runStatus = await openai.beta.threads.runs.retrieve(currentThreadId, run.id);
+    }
+    const messages = await openai.beta.threads.messages.list(currentThreadId);
+    const lastMessageForRun = messages.data.filter(message => message.run_id === run.id && message.role === "assistant").pop();
+    if (!lastMessageForRun.content[0].text.annotations || lastMessageForRun.content[0].text.annotations.length === 0) {
+      // Immediately send back the informational message
+      let informationalMessage = lastMessageForRun.content[0].text.value;
+      res.json({ infoMessage: informationalMessage, followUpNeeded: true, threadId: currentThreadId });
+    } else {
+      let markDownContent = marked(lastMessageForRun.content[0].text.value);
+      res.json({ answer: markDownContent, followUpNeeded: false, threadId: currentThreadId });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("An error occurred.");
+  }
+
+
+
 })
 
 
