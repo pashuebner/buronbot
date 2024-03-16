@@ -102,6 +102,7 @@ axios.get(url)
   .catch(console.error);
 
   let asking = "Verwende diesen HTML Abschnitt und erstelle eine Tabelle mit den hier enthaltenen Informationen: "+sitetext;
+  console.log(asking);
   try {
     const assistant = await openai.beta.assistants.retrieve('asst_MaxQ5GBsUv7U8FRHISngVC2x');
     const thread = await openai.beta.threads.create();
