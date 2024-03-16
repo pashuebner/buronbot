@@ -92,19 +92,23 @@ app.post('/ask', async (req, res) => {
 app.post('/scrape', async (req, res) => {
 const url = req.body.question;
 let sitetext;
-axios.get(url)
-  .then(response => {
-    const html = response.data;
-    const $ = cheerio.load(html);
-    const targetElement = $('#ctl00_contentpane .content-block');
-    sitetext = targetElement.text();
-    console.log(sitetext);
-  })
+  try {
+
+    await axios.get(url)
+      .then(response => {
+        const html = response.data;
+        const $ = cheerio.load(html);
+        const targetElement = $('#ctl00_contentpane .content-block');
+        sitetext = targetElement.text();
+        console.log(sitetext);
+      })
   .catch(console.error);
 
   let asking = "Verwende diesen HTML Abschnitt und erstelle eine Tabelle mit den hier enthaltenen Informationen: "+sitetext;
   console.log(asking);
-  try {
+
+
+
     const assistant = await openai.beta.assistants.retrieve('asst_MaxQ5GBsUv7U8FRHISngVC2x');
     const thread = await openai.beta.threads.create();
     currentThreadId = thread.id;
