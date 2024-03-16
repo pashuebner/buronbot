@@ -96,7 +96,6 @@ axios.get(url)
   .then(response => {
     const html = response.data;
     const $ = cheerio.load(html);
-    const checkElement = $('hi');
     const targetElement = $('#ctl00_contentpane .content-block');
     const text = targetElement.html();
     console.log(text);
