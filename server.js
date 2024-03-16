@@ -103,7 +103,7 @@ let sitetext;
       })
       .catch(console.error);
 
-      let asking = "Verwende diesen HTML Abschnitt und erstelle eine Tabelle mit den hier enthaltenen Informationen: "+sitetext;
+      let asking = "Verwende diesen HTML Abschnitt und erstelle eine Tabelle mit den hier enthaltenen Informationen, verzichte dabei auf irgendwelche zwischeninfos und gebe nur die Tabelle aus: "+sitetext;
       console.log(asking);
 
     const assistant = await openai.beta.assistants.retrieve('asst_MaxQ5GBsUv7U8FRHISngVC2x');
