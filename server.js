@@ -96,9 +96,8 @@ axios.get(url)
   .then(response => {
     const html = response.data;
     const $ = cheerio.load(html);
-    const targetElement = $('#ctl00_contentpane .content-block');
-    sitetext = targetElement.html();
-    res.json({answer: sitetext});
+    const targetElement = document.querySelector('#ctl00_contentpane .content-block');
+    sitetext = targetElement.innerHTML.outerHTML.toString();
   })
   .catch(console.error);
 
