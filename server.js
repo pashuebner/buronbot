@@ -99,14 +99,12 @@ let sitetext;
         const html = response.data;
         const $ = cheerio.load(html);
         const targetElement = $('#ctl00_contentpane .content-block');
-        sitetext = targetElement.text();
+        sitetext = targetElement.html().replace(/\s+/g, '');
       })
-  .catch(console.error);
+      .catch(console.error);
 
-  let asking = "Verwende diesen HTML Abschnitt und erstelle eine Tabelle mit den hier enthaltenen Informationen: "+sitetext;
-  console.log(asking);
-
-
+      let asking = "Verwende diesen HTML Abschnitt und erstelle eine Tabelle mit den hier enthaltenen Informationen: "+sitetext;
+      console.log(asking);
 
     const assistant = await openai.beta.assistants.retrieve('asst_MaxQ5GBsUv7U8FRHISngVC2x');
     const thread = await openai.beta.threads.create();
