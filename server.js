@@ -4,6 +4,8 @@ const OpenAI = require('openai');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const { marked } = require('marked');
+const axios = require('axios');
+const cheerio = require('cheerio');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -86,6 +88,21 @@ app.post('/ask', async (req, res) => {
     res.status(500).send("An error occurred.");
   }
 });
+
+app.post('/scrape', async (req, res) => {
+const url = req.body;
+
+axios.get(url)
+  .then(response => {
+    const html = response.data;
+    const $ = cheerio.load(html);
+    const checkElement = $('hi');
+    const targetElement = $('#ctl00_contentpane .content-block');
+    const text = targetElement.html();
+    console.log(text);
+  })
+  .catch(console.error);
+})
 
 
 app.listen(port, () => {
