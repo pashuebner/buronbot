@@ -100,7 +100,6 @@ let sitetext;
         const $ = cheerio.load(html);
         const targetElement = $('#ctl00_contentpane .content-block');
         sitetext = targetElement.text();
-        console.log(sitetext);
       })
   .catch(console.error);
 
